@@ -1,0 +1,31 @@
+[build-system]
+requires = ["maturin>=1.8,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "pled"
+description = "print-less debugging"
+license = "Apache-2.0"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+dynamic = ["version"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.4",
+]
+
+[tool.maturin]
+python-source = "python"
+python-packages = ["pled"]
+module-name = "pled._pled"
+features = ["pyo3/extension-module"]
+
+[tool.pyright]
+typeCheckingMode = "strict"
+pythonVersion = "3.10"
+reportMissingTypeStubs = true
