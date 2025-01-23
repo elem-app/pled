@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html><head><script type="module">import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.4.1/+esm'
+const traceData = [{"type":"FunctionEntry","timestamp":0.010341791,"function_name":"your_project.main.entry","args":[["flag","2"]]},{"type":"Branch","timestamp":0.010348791,"function_name":"your_project.main.entry","branch_type":"if","condition_expr":"flag > 0","evaluated_values":[["flag","2"]],"condition_result":true},{"type":"FunctionEntry","timestamp":0.010350833,"function_name":"your_project.dep.dep_func","args":[["limit","2"]]},{"type":"Branch","timestamp":0.01035325,"function_name":"your_project.dep.dep_func","branch_type":"while","condition_expr":"i < limit","evaluated_values":[["i","0"],["limit","2"]],"condition_result":true},{"type":"Branch","timestamp":0.01035575,"function_name":"your_project.dep.dep_func","branch_type":"while","condition_expr":"i < limit","evaluated_values":[["i","1"],["limit","2"]],"condition_result":true},{"type":"Branch","timestamp":0.010358625,"function_name":"your_project.dep.dep_func","branch_type":"while","condition_expr":"i < limit","evaluated_values":[["i","2"],["limit","2"]],"condition_result":false},{"type":"FunctionExit","timestamp":0.010360333,"function_name":"your_project.dep.dep_func","return_value":"3"},{"type":"FunctionExit","timestamp":0.010429666,"function_name":"your_project.main.entry","return_value":null}];class GraphGenerator {
+  constructor(data) {
+    this.data = data;
+    this.initializeMermaid();
+  }
+
+  initializeMermaid() {
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "default",
+      fontFamily: "Courier New, monospace",
+    });
+  }
+
+  generateMermaidDefinition() {
+    const diagram = ["sequenceDiagram", "    create actor pled"];
+    const stack = ["pled"];
+    const used = new Map();
+    for (const trace of this.data) {
+      let displayName,
+        participant,
+        caller = null;
+      if (trace.function_name) {
+        const lastDotIndex = trace.function_name.lastIndexOf(".");
+        if (lastDotIndex === -1) {
+          displayName = trace.function_name;
+          participant = trace.function_name;
+        } else {
+          const moduleName = trace.function_name.slice(0, lastDotIndex);
+          const functionName = trace.function_name.slice(lastDotIndex + 1);
+          displayName = `${moduleName}<br>${functionName}`;
+          participant = trace.function_name.replace(".", "__");
+        }
+        if (used.has(displayName)) {
+          participant = `${participant}__${used.get(displayName)}`;
+        }
+      } else {
+        displayName = null;
+        participant = stack[stack.length - 1];
+      }
+      switch (trace.type) {
+        case "FunctionEntry":
+          caller = stack[stack.length - 1];
+          const formattedArgs = trace.args.map(([name, value]) => `${name}=${value}`).join(", ");
+          diagram.push(
+            `    create participant ${participant} as ${displayName}`
+          );
+          diagram.push(`    ${caller}->>${participant}: ${formattedArgs}`);
+          stack.push(participant);
+          break;
+        case "FunctionExit":
+          stack.pop();
+          caller = stack[stack.length - 1];
+          diagram.push(`    destroy ${participant}`);
+          diagram.push(
+            `    ${participant}->>${caller}: return ${trace.return_value}`
+          );
+          if (used.has(displayName)) {
+            used.set(displayName, used.get(displayName) + 1);
+          } else {
+            used.set(displayName, 1);
+          }
+          break;
+        case "Branch":
+          diagram.push(
+            `    ${participant}-->${participant}: ${trace.branch_type} ${trace.condition_expr}<br>=> ${trace.condition_result}`
+          );
+          break;
+        case "Await":
+          diagram.push(
+            `    ${participant}-->${participant}: ${trace.await_expr}<br>=> ${trace.await_result}`
+          );
+          break;
+        case "Yield":
+          stack.pop();
+          caller = stack[stack.length - 1];
+          diagram.push(
+            `    ${participant}-->>+${caller}: yield ${trace.yield_value}`
+          );
+          break;
+        case "YieldResume":
+          caller = stack[stack.length - 1];
+          diagram.push(`    ${caller}-->>-${participant}: send ${trace.send_value}`);
+          stack.push(participant);
+          break;
+      }
+    }
+    return diagram.join("\n");
+  }
+
+  render() {
+    const root = document.getElementById("root");
+
+    // Create container
+    const container = document.createElement("div");
+    container.className = "graph-container";
+
+    // Add diagram
+    const diagram = document.createElement("div");
+    diagram.className = "mermaid";
+    diagram.textContent = this.generateMermaidDefinition();
+    container.appendChild(diagram);
+
+    // Add controls
+    const controls = this.createControls();
+    container.appendChild(controls);
+
+    root.appendChild(container);
+    mermaid.contentLoaded();
+  }
+
+  createControls() {
+    const controls = document.createElement("div");
+    controls.className = "controls";
+
+    // // Add search, filters, etc.
+    // const search = document.createElement("input");
+    // search.type = "text";
+    // search.placeholder = "Search relationships...";
+    // search.addEventListener("input", this.handleSearch.bind(this));
+
+    // controls.appendChild(search);
+    return controls;
+  }
+
+  handleSearch(event) {
+    const searchTerm = event.target.value.toLowerCase();
+    // Implement filtering logic
+  }
+}
+
+// Initialize when document loads
+document.addEventListener("DOMContentLoaded", () => {
+  const generator = new GraphGenerator(traceData);
+  generator.render();
+});
+</script></head><body><div id="root"></div></body></html>

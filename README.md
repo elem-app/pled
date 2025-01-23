@@ -4,6 +4,13 @@ pled is a library for debugging Python code so you don't have to paste `print()`
 
 It features no-code instrumentation on your codebase.
 
+## Use cases
+
+- When you are writing a new function/module and want to trace its execution without `print`-ing or logging everything yourself.
+- When you see a downstream exception but need to understand upstream code that may have caused it.
+- When you need temporary state tracking which you will remove later.
+- When you want to get a visual representation of the execution flow of your code.
+
 ## Getting started
 
 1. Install `pled` as a library
@@ -35,7 +42,98 @@ It features no-code instrumentation on your codebase.
 
    # Or dump into stringified JSON
    json_traces = tracer.dump_json()
+
+   # Or generate an HTML report (needs Internet connection as it uses mermaid.js from CDN)
+   tracer.dump_report_file("report.html")
    ```
+
+A sample output involving a `your_project.main` module and a `your_project.dep` module:
+
+<details>
+<summary>Click to expand JSON</summary>
+
+```json
+[
+  {
+    "type": "FunctionEntry",
+    "timestamp": 0.010341791,
+    "function_name": "your_project.main.entry",
+    "args": [["flag", "2"]]
+  },
+  {
+    "type": "Branch",
+    "timestamp": 0.010348791,
+    "function_name": "your_project.main.entry",
+    "branch_type": "if",
+    "condition_expr": "flag > 0",
+    "evaluated_values": [["flag", "2"]],
+    "condition_result": true
+  },
+  {
+    "type": "FunctionEntry",
+    "timestamp": 0.010350833,
+    "function_name": "your_project.dep.dep_func",
+    "args": [["limit", "2"]]
+  },
+  {
+    "type": "Branch",
+    "timestamp": 0.01035325,
+    "function_name": "your_project.dep.dep_func",
+    "branch_type": "while",
+    "condition_expr": "i < limit",
+    "evaluated_values": [
+      ["i", "0"],
+      ["limit", "2"]
+    ],
+    "condition_result": true
+  },
+  {
+    "type": "Branch",
+    "timestamp": 0.01035575,
+    "function_name": "your_project.dep.dep_func",
+    "branch_type": "while",
+    "condition_expr": "i < limit",
+    "evaluated_values": [
+      ["i", "1"],
+      ["limit", "2"]
+    ],
+    "condition_result": true
+  },
+  {
+    "type": "Branch",
+    "timestamp": 0.010358625,
+    "function_name": "your_project.dep.dep_func",
+    "branch_type": "while",
+    "condition_expr": "i < limit",
+    "evaluated_values": [
+      ["i", "2"],
+      ["limit", "2"]
+    ],
+    "condition_result": false
+  },
+  {
+    "type": "FunctionExit",
+    "timestamp": 0.010360333,
+    "function_name": "your_project.dep.dep_func",
+    "return_value": "3"
+  },
+  {
+    "type": "FunctionExit",
+    "timestamp": 0.010429666,
+    "function_name": "your_project.main.entry",
+    "return_value": null
+  }
+]
+```
+
+</details>
+
+<details>
+<summary>Click to see a screenshot of the HTML report</summary>
+
+![Report](./examples/basic-reporting/Screenshot.png)
+
+</details>
 
 ## Types of traces
 

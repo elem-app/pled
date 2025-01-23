@@ -1,0 +1,71 @@
+[
+  {
+    "type": "FunctionEntry",
+    "timestamp": 0.010341791,
+    "function_name": "your_project.main.entry",
+    "args": [["flag", "2"]]
+  },
+  {
+    "type": "Branch",
+    "timestamp": 0.010348791,
+    "function_name": "your_project.main.entry",
+    "branch_type": "if",
+    "condition_expr": "flag > 0",
+    "evaluated_values": [["flag", "2"]],
+    "condition_result": true
+  },
+  {
+    "type": "FunctionEntry",
+    "timestamp": 0.010350833,
+    "function_name": "your_project.dep.dep_func",
+    "args": [["limit", "2"]]
+  },
+  {
+    "type": "Branch",
+    "timestamp": 0.01035325,
+    "function_name": "your_project.dep.dep_func",
+    "branch_type": "while",
+    "condition_expr": "i < limit",
+    "evaluated_values": [
+      ["i", "0"],
+      ["limit", "2"]
+    ],
+    "condition_result": true
+  },
+  {
+    "type": "Branch",
+    "timestamp": 0.01035575,
+    "function_name": "your_project.dep.dep_func",
+    "branch_type": "while",
+    "condition_expr": "i < limit",
+    "evaluated_values": [
+      ["i", "1"],
+      ["limit", "2"]
+    ],
+    "condition_result": true
+  },
+  {
+    "type": "Branch",
+    "timestamp": 0.010358625,
+    "function_name": "your_project.dep.dep_func",
+    "branch_type": "while",
+    "condition_expr": "i < limit",
+    "evaluated_values": [
+      ["i", "2"],
+      ["limit", "2"]
+    ],
+    "condition_result": false
+  },
+  {
+    "type": "FunctionExit",
+    "timestamp": 0.010360333,
+    "function_name": "your_project.dep.dep_func",
+    "return_value": "3"
+  },
+  {
+    "type": "FunctionExit",
+    "timestamp": 0.010429666,
+    "function_name": "your_project.main.entry",
+    "return_value": null
+  }
+]
