@@ -1,6 +1,7 @@
 import asyncio
 import importlib.util
 import sys
+import traceback
 import types
 from contextlib import contextmanager
 from dataclasses import dataclass
@@ -185,7 +186,11 @@ class Executor:
         with self._tracer(options.includes, options.output_dir) as tracer:
 
             def run_module():
-                _ = importlib.import_module(self.module_name)
+                try:
+                    _ = importlib.import_module(self.module_name)
+                except Exception as e:
+                    print(f"Error importing module {self.module_name}: {e}")
+                    print(traceback.format_exc())
 
             if options.background:
                 import threading
@@ -214,9 +219,13 @@ class Executor:
             func = getattr(module, func_name)
 
             def run_func():
-                result = func(*args, **kwargs)
-                if isawaitable(result):
-                    asyncio.get_event_loop().run_until_complete(result)
+                try:
+                    result = func(*args, **kwargs)
+                    if isawaitable(result):
+                        asyncio.get_event_loop().run_until_complete(result)
+                except Exception as e:
+                    print(f"Error calling function {func_name}: {e}")
+                    print(traceback.format_exc())
 
             if options.background:
                 import threading
