@@ -8,7 +8,7 @@ def __pled_trace_fexit__(func_name, return_value=None):
     __pled_tracer.trace_fexit(func_name, repr(return_value) if return_value is not None else None)
     return return_value
 def __pled_trace_branch__(func_name, branch_type, condition_expr, evaluated_values, condition_result):
-    __pled_tracer.trace_branch(func_name, branch_type, condition_expr, [(name, repr(value)) for name, value in evaluated_values], condition_result)
+    __pled_tracer.trace_branch(func_name, branch_type, condition_expr, [(name, repr(value)) for name, value in evaluated_values], bool(condition_result))
 async def __pled_trace_await__(func_name, await_expr, await_value):
     result = await await_value
     __pled_tracer.trace_await(func_name, await_expr, repr(await_value), repr(result))
